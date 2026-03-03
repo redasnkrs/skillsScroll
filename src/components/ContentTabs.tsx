@@ -6,6 +6,10 @@ import { useParams } from "next/navigation";
 import { toast } from "sonner";
 import ConfirmModal from "./ConfirmModal";
 import Image from "next/image";
+import { MDXRemote } from "next-mdx-remote";
+import { YouTube, StatBlock, Callout } from "./mdx";
+
+const mdxComponents = { YouTube, StatBlock, Callout };
 
 const tabs = ["News", "Speedrun", "Tips", "Builds", "Achievements"];
 
@@ -85,18 +89,6 @@ export default function ContentTabs({
     setBuildToDelete(null);
   };
 
-  const formatMarkdown = (md: string) => {
-    return md
-      .replace(/^# (.*$)/gm, '<h1 class="text-4xl font-black uppercase tracking-tighter mb-8 mt-12 text-white border-b-4 border-zinc-900 pb-4">$1</h1>')
-      .replace(/^## (.*$)/gm, '<h2 class="text-xl font-bold uppercase tracking-[0.2em] mb-6 mt-16 text-zinc-100 flex items-center gap-4"><span class="w-2 h-2 bg-white"></span>$1</h2>')
-      .replace(/^### (.*$)/gm, '<h3 class="text-lg font-bold mb-4 mt-10 text-zinc-300 italic">$1</h3>')
-      .replace(/^\- (.*$)/gm, '<div class="flex gap-3 mb-2 text-zinc-400"><span class="text-zinc-700">•</span><span>$1</span></div>')
-      .replace(/^\* (.*$)/gm, '<div class="flex gap-3 mb-2 text-zinc-400"><span class="text-zinc-700">•</span><span>$1</span></div>')
-      .replace(/\*\*(.*?)\*\*/g, '<strong class="text-zinc-50 font-bold">$1</strong>')
-      .replace(/---/g, '<hr class="border-zinc-900 my-12" />')
-      .replace(/\n/g, '<br />');
-  };
-
   const formatSteamContent = (html: string) => {
     return html.replace(/\[img\](.*?)\[\/img\]/g, '').replace(/\[b\]/g, '<strong>').replace(/\[\/b\]/g, '</strong>').replace(/\[i\]/g, '<em>').replace(/\[\/i\]/g, '</em>').replace(/\[url=(.*?)\](.*?)\[\/url\]/g, '<a href="$1" target="_blank" class="text-white underline">$2</a>').replace(/\n/g, '<br />');
   };
@@ -121,7 +113,7 @@ export default function ContentTabs({
         {activeTab === "Achievements" && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in duration-500">
             {achievements.length > 0 ? achievements.map((ach, idx) => (
-              <div key={idx} className="flex gap-6 p-6 border border-zinc-900 rounded-xl bg-zinc-950/20 group hover:bg-zinc-900/40 transition-all">
+              <div key={idx} className="flex gap-6 p-6 border border-zinc-900 rounded-xl bg-zinc-950/20 group hover:bg-zinc-900/40 transition-all cursor-default">
                 <div className="relative w-16 h-16 shrink-0 rounded-lg overflow-hidden border border-zinc-800 grayscale group-hover:grayscale-0 transition-all duration-500">
                   <Image src={ach.icon} alt={ach.name} fill className="object-cover" />
                 </div>
@@ -134,29 +126,21 @@ export default function ContentTabs({
                   </div>
                   <div className="relative mt-2 min-h-[1.5rem]">
                     <p className={`text-xs leading-relaxed italic transition-all duration-700 ${
-                      ach.isSecret 
-                        ? "text-zinc-800 blur-md group-hover:blur-none group-hover:text-zinc-400 select-none" 
-                        : "text-zinc-500"
-                    }`}>
-                      {ach.desc}
-                    </p>
+                      ach.isSecret ? "text-zinc-800 blur-md group-hover:blur-none group-hover:text-zinc-400 select-none" : "text-zinc-500"
+                    }`}>{ach.desc}</p>
                     {ach.isSecret && (
                       <div className="absolute inset-0 flex items-center justify-start pointer-events-none group-hover:opacity-0 transition-opacity duration-300">
-                        <span className="px-2 py-0.5 rounded border border-zinc-800 bg-zinc-950 text-[8px] font-black uppercase tracking-[0.3em] text-zinc-600">
-                          [ Data Classifiée ]
-                        </span>
+                        <span className="px-2 py-0.5 rounded border border-zinc-800 bg-zinc-950 text-[8px] font-black uppercase tracking-[0.3em] text-zinc-600">[ Data Classifiée ]</span>
                       </div>
                     )}
                   </div>
                 </div>
               </div>
-            )) : (
-              <div className="col-span-2 py-32 text-center border border-dashed border-zinc-900 rounded-xl text-zinc-800 text-[10px] font-mono uppercase tracking-[0.4em]">No synchronization with Steam Community Trophies</div>
-            )}
+            )) : <div className="col-span-2 py-32 text-center border border-dashed border-zinc-900 rounded-xl text-zinc-800 text-[10px] font-mono uppercase tracking-[0.4em]">No synchronization with Steam Community Trophies</div>}
           </div>
         )}
 
-        {/* Builds Tab */}
+        {/* Builds Tab - WITH MDX Support */}
         {activeTab === "Builds" && (
           <div className="animate-in fade-in duration-500">
             {!activeBuild && !isDrafting && (
@@ -190,7 +174,7 @@ export default function ContentTabs({
                   </div>
                 </div>
                 <input value={draftTitle} onChange={(e) => setDraftTitle(e.target.value)} placeholder="ARCHIVE_TITLE" className="w-full bg-transparent border-b border-zinc-900 py-4 text-2xl font-black uppercase tracking-tighter text-white outline-none focus:border-zinc-500" />
-                <textarea value={draftContent} onChange={(e) => setDraftContent(e.target.value)} placeholder="PASTE RAW README / NOTES HERE..." className="w-full h-[500px] bg-zinc-950 p-8 rounded-2xl border border-zinc-900 font-mono text-sm text-zinc-400 outline-none focus:border-zinc-700 resize-none" />
+                <textarea value={draftContent} onChange={(e) => setDraftContent(e.target.value)} placeholder="PASTE RAW README / NOTES HERE... (Support MDX like <YouTube id='...' />)" className="w-full h-[500px] bg-zinc-950 p-8 rounded-2xl border border-zinc-900 font-mono text-sm text-zinc-400 outline-none focus:border-zinc-700 resize-none" />
               </div>
             )}
 
@@ -202,7 +186,11 @@ export default function ContentTabs({
                     <button onClick={() => { setBuildToDelete(activeBuild.id); setIsDeleteModalOpen(true); }} className="text-[10px] font-bold uppercase tracking-[0.4em] text-red-900 hover:text-red-500 transition-colors">Terminate Module [DEL]</button>
                   )}
                 </div>
-                <div className="prose prose-invert max-w-none bg-black p-12 lg:p-20 rounded-3xl border border-zinc-900 leading-relaxed font-light text-zinc-400 shadow-2xl" dangerouslySetInnerHTML={{ __html: formatMarkdown(activeBuild.content) }} />
+                <div className="mdx-content bg-black p-12 lg:p-20 rounded-3xl border border-zinc-900 leading-relaxed font-light text-zinc-400 shadow-2xl">
+                  {activeBuild.mdxSource && (
+                    <MDXRemote {...activeBuild.mdxSource} components={mdxComponents} />
+                  )}
+                </div>
               </div>
             )}
           </div>

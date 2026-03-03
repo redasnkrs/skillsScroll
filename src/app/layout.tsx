@@ -5,6 +5,7 @@ import "./globals.css";
 import MaintenanceToggle from "@/components/MaintenanceToggle";
 import { Toaster } from "sonner";
 import { supabaseAdmin as supabase } from "@/lib/supabase";
+import PageTransition from "@/components/PageTransition";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -97,8 +98,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         </aside>
 
         <main className="flex-grow ml-72 bg-[#050505] min-h-screen">
-          <div className="max-w-5xl mx-auto p-12 lg:p-24">
-            {children}
+          <div className="max-w-5xl mx-auto p-12 lg:p-24 overflow-hidden">
+            <PageTransition>
+              {children}
+            </PageTransition>
           </div>
         </main>
         

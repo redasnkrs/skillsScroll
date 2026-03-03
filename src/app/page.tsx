@@ -1,8 +1,7 @@
-import Link from "next/link";
-import Image from "next/image";
 import SearchInput from "@/components/SearchInput";
-import DeleteGameButton from "@/components/DeleteGameButton";
+import GameCard from "@/components/GameCard";
 import { supabaseAdmin as supabase } from "@/lib/supabase";
+import Link from "next/link";
 
 export default async function Home() {
   const [gamesRes, catsRes] = await Promise.all([
@@ -16,7 +15,7 @@ export default async function Home() {
   return (
     <div className="max-w-5xl mx-auto">
       <header className="mb-20">
-        <h1 className="text-3xl font-black mb-4 tracking-tight uppercase">Private Knowledge Base</h1>
+        <h1 className="text-3xl font-black mb-4 tracking-tight uppercase text-white">Private Knowledge Base</h1>
         <div className="h-1 w-12 bg-zinc-800"></div>
       </header>
 
@@ -29,32 +28,7 @@ export default async function Home() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
           {games.map((game: any, idx: number) => (
-            <div key={game.id} className="relative group">
-              <DeleteGameButton gameId={game.id} />
-              <Link 
-                href={`/game/${game.id}`}
-                className="block relative h-64 rounded-lg border border-zinc-900 bg-zinc-950 overflow-hidden hover:border-zinc-500 transition-all duration-500 shadow-2xl"
-              >
-                {game.image_url && (
-                  <div className="absolute inset-0 z-0 grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-1000 opacity-20 group-hover:opacity-60">
-                    <Image
-                      src={game.image_url}
-                      alt={game.name}
-                      fill
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      className="object-cover"
-                      priority={idx < 3}
-                    />
-                  </div>
-                )}
-                
-                <div className="relative z-10 p-10 h-full flex flex-col justify-end bg-gradient-to-t from-black via-black/40 to-transparent">
-                  <div className="text-2xl mb-4 grayscale group-hover:grayscale-0 transition-all">{game.icon}</div>
-                  <h3 className="text-lg font-bold mb-1 text-white tracking-tight">{game.name}</h3>
-                  <p className="text-[10px] text-zinc-500 uppercase tracking-[0.3em] font-medium">{game.category_id}</p>
-                </div>
-              </Link>
-            </div>
+            <GameCard key={game.id} game={game} priority={idx < 3} />
           ))}
         </div>
       </section>

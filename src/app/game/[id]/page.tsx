@@ -1,9 +1,31 @@
 import Link from "next/link";
-import Image from "next/image";
 import ContentTabs from "@/components/ContentTabs";
+import GameHero from "@/components/GameHero";
 import { notFound } from "next/navigation";
 import { getSpeedrunData, getRedditTips, getBuildsForGame, getSteamAchievements } from "@/app/actions";
 import { supabaseAdmin as supabase } from "@/lib/supabase";
+import { serialize } from "next-mdx-remote/serialize";
+import { Metadata } from "next";
+
+export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+  const { id } = await params;
+  const { data: game } = await supabase.from('games').select('*').eq('id', id).single();
+  
+  if (!game) return { title: "Game Not Found" };
+
+  const ogUrl = new URL('https://skillscrolls.vercel.app/api/og');
+  ogUrl.searchParams.set('title', game.name);
+  ogUrl.searchParams.set('category', game.category_id);
+  if (game.image_url) ogUrl.searchParams.set('image', game.image_url);
+
+  return {
+    title: `${game.name} | SkillScrolls`,
+    description: `Technical archive for ${game.name}. Strategies, builds, news and speedruns.`,
+    openGraph: {
+      images: [ogUrl.toString()],
+    },
+  };
+}
 
 async function getSteamNews(steamId: number | null) {
   if (!steamId) return [];
@@ -36,13 +58,23 @@ export default async function GamePage({ params }: { params: { id: string } }) {
     notFound();
   }
 
-  const [steamNews, speedruns, redditTips, builds, achievements] = await Promise.all([
+  // Quintuple fetch simultané
+  const [steamNews, speedruns, redditTips, rawBuilds, achievements] = await Promise.all([
     getSteamNews(game.steam_id),
     getSpeedrunData(game.name),
     getRedditTips(game.name),
     getBuildsForGame(id),
     getSteamAchievements(game.steam_id)
   ]);
+
+  // Sérialisation MDX pour chaque build
+  const builds = await Promise.all(rawBuilds.map(async (build: any) => {
+    const mdxSource = await serialize(build.content);
+    return {
+      ...build,
+      mdxSource
+    };
+  }));
 
   return (
     <div className="max-w-5xl animate-in fade-in duration-700">
@@ -53,25 +85,7 @@ export default async function GamePage({ params }: { params: { id: string } }) {
         <span className="text-zinc-800">VAULT NODE / {game.id}</span>
       </nav>
 
-      <header className="relative h-[400px] rounded-2xl overflow-hidden border border-zinc-900 group shadow-2xl">
-        {game.image_url && (
-          <Image
-            src={game.image_url}
-            alt={game.name}
-            fill
-            priority
-            className="object-cover opacity-40 blur-[1px] scale-105 group-hover:scale-110 transition-transform duration-[2s]"
-          />
-        )}
-        <div className="relative z-10 h-full p-12 flex flex-col justify-end bg-gradient-to-t from-black via-black/40 to-transparent">
-          <div className="flex items-center gap-4 mb-6">
-            <span className="text-4xl grayscale group-hover:grayscale-0 transition-all duration-500">{game.icon}</span>
-            <div className="h-[1px] w-12 bg-zinc-700"></div>
-          </div>
-          <h1 className="text-6xl font-black text-white tracking-tighter uppercase mb-4 leading-none">{game.name}</h1>
-          <p className="text-sm font-mono text-zinc-500 uppercase tracking-[0.4em]">{game.category_id} Archives</p>
-        </div>
-      </header>
+      <GameHero game={game} />
 
       <ContentTabs 
         steamNews={steamNews} 
