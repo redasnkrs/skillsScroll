@@ -1,28 +1,35 @@
 import CategoryPage from "../../CategoryLayout";
-import fs from "fs/promises";
-import path from "path";
-
-// Données fictives pour l'instant (vous pourriez aussi les stocker en JSON par la suite)
-const mockData: Record<string, any[]> = {
-  tips: [
-    { title: "Perfect Parrying in Sekiro", description: "Master the rhythm-based combat.", category: "Action" },
-  ],
-  speedruns: [
-    { title: "Elden Ring Any% Unrestricted", description: "Fastest way to become Elden Lord.", category: "Soulslike" },
-  ],
-  tricks: [
-    { title: "Rocket Jumping Mechanics", description: "Using explosives for movement.", category: "Movement" },
-  ]
-};
+import { notFound } from "next/navigation";
+import { supabaseAdmin as supabase } from "@/lib/supabase";
 
 export default async function Page({ params }: { params: { slug: string } }) {
   const { slug } = await params;
-  const CATS_PATH = path.join(process.cwd(), "src/data/categories.json");
-  const catsFile = await fs.readFile(CATS_PATH, "utf8");
-  const categories = JSON.parse(catsFile);
   
-  const category = categories.find((c: any) => c.id === slug);
-  const items = mockData[slug] || [];
+  // 1. Récupérer la catégorie
+  const { data: category } = await supabase
+    .from('categories')
+    .select('*')
+    .eq('id', slug)
+    .single();
 
-  return <CategoryPage title={category?.name || slug} items={items} />;
+  if (!category) {
+    notFound();
+  }
+
+  // 2. Récupérer les jeux de cette catégorie
+  const { data: games } = await supabase
+    .from('games')
+    .select('*')
+    .eq('category_id', slug)
+    .order('created_at', { ascending: false });
+
+  // On transforme les jeux en format "items" pour le CategoryPage
+  const items = (games || []).map(game => ({
+    title: game.name,
+    description: `Technical archive for ${game.name}. Access builds, news, and speedruns.`,
+    category: category.name,
+    id: game.id
+  }));
+
+  return <CategoryPage title={category.name} items={items} />;
 }

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { searchSteamGames, addGameAuto } from "@/app/actions";
+import { toast } from "sonner";
 
 export default function SearchInput() {
   const [query, setQuery] = useState("");
@@ -25,7 +26,6 @@ export default function SearchInput() {
     return () => clearTimeout(timer);
   }, [query]);
 
-  // Fermer la liste si on clique en dehors
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -36,12 +36,26 @@ export default function SearchInput() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const handleAction = async (formData: FormData) => {
+    const res = await addGameAuto(formData);
+    if (res.success) {
+      toast.success("Intelligence Synchronized", {
+        description: "The game node has been successfully integrated into the library."
+      });
+      setQuery("");
+    } else {
+      toast.error("Synchronization Failure", {
+        description: res.error || "An unknown error occurred during archiving."
+      });
+    }
+  };
+
   return (
     <section className="mb-24 bg-zinc-950 p-12 rounded-2xl border border-zinc-900 border-dashed">
       <div className="max-w-md mx-auto text-center" ref={containerRef}>
         <p className="text-[10px] font-bold text-zinc-700 uppercase tracking-[0.4em] mb-8">One-Tap Archiving</p>
         
-        <form action={addGameAuto} className="flex flex-col gap-6 relative">
+        <form action={handleAction} className="flex flex-col gap-6 relative">
           <div className="relative">
             <input 
               name="name" 
@@ -53,7 +67,6 @@ export default function SearchInput() {
               required
             />
             
-            {/* Liste de suggestions */}
             {suggestions.length > 0 && (
               <div className="absolute top-full left-0 right-0 mt-2 bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden z-50 shadow-2xl">
                 {suggestions.map((game) => (

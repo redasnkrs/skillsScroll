@@ -35,9 +35,9 @@ export default function CategoryPage({ title, items }: { title: string, items: a
                 </p>
                 <div className="mt-6 flex items-center gap-4 opacity-30 group-hover:opacity-100 transition-opacity">
                    <div className="h-[1px] w-8 bg-zinc-700"></div>
-                   <button className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-white transition-colors">
-                     Read full document &rarr;
-                   </button>
+                   <Link href={`/game/${item.id}`} className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-white transition-colors">
+                     Open Archive Node &rarr;
+                   </Link>
                 </div>
               </div>
             </div>

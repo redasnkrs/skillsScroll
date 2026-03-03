@@ -132,7 +132,22 @@ export default function ContentTabs({
                       <span className="text-[10px] font-mono text-zinc-600 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">{ach.rarity}%</span>
                     )}
                   </div>
-                  <p className="text-xs text-zinc-500 mt-1 line-clamp-2 italic leading-relaxed">"{ach.desc}"</p>
+                  <div className="relative mt-2 min-h-[1.5rem]">
+                    <p className={`text-xs leading-relaxed italic transition-all duration-700 ${
+                      ach.isSecret 
+                        ? "text-zinc-800 blur-md group-hover:blur-none group-hover:text-zinc-400 select-none" 
+                        : "text-zinc-500"
+                    }`}>
+                      {ach.desc}
+                    </p>
+                    {ach.isSecret && (
+                      <div className="absolute inset-0 flex items-center justify-start pointer-events-none group-hover:opacity-0 transition-opacity duration-300">
+                        <span className="px-2 py-0.5 rounded border border-zinc-800 bg-zinc-950 text-[8px] font-black uppercase tracking-[0.3em] text-zinc-600">
+                          [ Data Classifiée ]
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             )) : (

@@ -1,10 +1,9 @@
-import fs from "fs/promises";
-import path from "path";
 import Link from "next/link";
 import Image from "next/image";
 import ContentTabs from "@/components/ContentTabs";
 import { notFound } from "next/navigation";
 import { getSpeedrunData, getRedditTips, getBuildsForGame, getSteamAchievements } from "@/app/actions";
+import { supabaseAdmin as supabase } from "@/lib/supabase";
 
 async function getSteamNews(steamId: number | null) {
   if (!steamId) return [];
@@ -21,31 +20,28 @@ async function getSteamNews(steamId: number | null) {
       date: new Date(item.date * 1000).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' }),
       url: item.url
     }));
-  } catch (e) {
-    console.error("Steam News Fetch Error:", e);
-    return [];
-  }
+  } catch (e) { return []; }
 }
 
 export default async function GamePage({ params }: { params: { id: string } }) {
   const { id } = await params;
-  const DATA_PATH = path.join(process.cwd(), "src/data/games.json");
-  const file = await fs.readFile(DATA_PATH, "utf8");
-  const games = JSON.parse(file);
   
-  const game = games.find((g: any) => g.id === id);
+  const { data: game, error } = await supabase
+    .from('games')
+    .select('*')
+    .eq('id', id)
+    .single();
 
-  if (!game) {
+  if (error || !game) {
     notFound();
   }
 
-  // Quintuple fetch simultané (News, Speedrun, Reddit Tips, Local Builds, Achievements)
   const [steamNews, speedruns, redditTips, builds, achievements] = await Promise.all([
-    getSteamNews(game.steamId),
+    getSteamNews(game.steam_id),
     getSpeedrunData(game.name),
     getRedditTips(game.name),
     getBuildsForGame(id),
-    getSteamAchievements(game.steamId)
+    getSteamAchievements(game.steam_id)
   ]);
 
   return (
@@ -58,9 +54,9 @@ export default async function GamePage({ params }: { params: { id: string } }) {
       </nav>
 
       <header className="relative h-[400px] rounded-2xl overflow-hidden border border-zinc-900 group shadow-2xl">
-        {game.imageUrl && (
+        {game.image_url && (
           <Image
-            src={game.imageUrl}
+            src={game.image_url}
             alt={game.name}
             fill
             priority
@@ -73,7 +69,7 @@ export default async function GamePage({ params }: { params: { id: string } }) {
             <div className="h-[1px] w-12 bg-zinc-700"></div>
           </div>
           <h1 className="text-6xl font-black text-white tracking-tighter uppercase mb-4 leading-none">{game.name}</h1>
-          <p className="text-sm font-mono text-zinc-500 uppercase tracking-[0.4em]">{game.category} Archives</p>
+          <p className="text-sm font-mono text-zinc-500 uppercase tracking-[0.4em]">{game.category_id} Archives</p>
         </div>
       </header>
 
@@ -87,7 +83,7 @@ export default async function GamePage({ params }: { params: { id: string } }) {
 
       <footer className="mt-40 pt-12 border-t border-zinc-950 flex justify-between items-center text-[10px] font-mono text-zinc-800 uppercase tracking-[0.4em]">
         <span>Automated Data Node</span>
-        <span>Secure Local Storage</span>
+        <span>Secure Cloud Storage</span>
       </footer>
     </div>
   );
