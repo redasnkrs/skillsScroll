@@ -1,0 +1,22 @@
+[
+  {
+    "id": "tips",
+    "name": "Tips",
+    "icon": "💡"
+  },
+  {
+    "id": "speedruns",
+    "name": "Speedruns",
+    "icon": "⚡"
+  },
+  {
+    "id": "tricks",
+    "name": "Tricks",
+    "icon": "🪄"
+  },
+  {
+    "id": "action",
+    "name": "Action",
+    "icon": "⚔️"
+  }
+]
