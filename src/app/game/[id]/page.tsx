@@ -3,13 +3,14 @@ import path from "path";
 import Link from "next/link";
 import ContentTabs from "@/components/ContentTabs";
 import { notFound } from "next/navigation";
+import { getSpeedrunData } from "@/app/actions";
 
 async function getSteamNews(steamId: number | null) {
   if (!steamId) return [];
   try {
     const res = await fetch(
       `https://api.steampowered.com/ISteamNews/GetNewsForApp/v0002/?appid=${steamId}&count=5&maxlength=300&format=json`,
-      { next: { revalidate: 3600 } } // Cache pour 1 heure
+      { next: { revalidate: 3600 } }
     );
     const data = await res.json();
     return data.appnews.newsitems.map((item: any) => ({
@@ -37,7 +38,11 @@ export default async function GamePage({ params }: { params: { id: string } }) {
     notFound();
   }
 
-  const steamNews = await getSteamNews(game.steamId);
+  // Récupération simultanée des news et des speedruns
+  const [steamNews, speedruns] = await Promise.all([
+    getSteamNews(game.steamId),
+    getSpeedrunData(game.name)
+  ]);
 
   return (
     <div className="max-w-5xl animate-in fade-in duration-700">
@@ -65,8 +70,7 @@ export default async function GamePage({ params }: { params: { id: string } }) {
         </div>
       </header>
 
-      {/* Dynamic Content Sections */}
-      <ContentTabs steamNews={steamNews} />
+      <ContentTabs steamNews={steamNews} speedruns={speedruns} />
 
       <footer className="mt-40 pt-12 border-t border-zinc-950 flex justify-between items-center text-[10px] font-mono text-zinc-800 uppercase tracking-[0.4em]">
         <span>Vault Access: Authorized</span>

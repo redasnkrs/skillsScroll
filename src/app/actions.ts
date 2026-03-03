@@ -95,6 +95,55 @@ export async function addGameAuto(formData: FormData) {
   return { success: true };
 }
 
+export async function getSpeedrunData(gameName: string) {
+  try {
+    // 1. Trouver le jeu sur Speedrun.com
+    const gameRes = await fetch(`https://www.speedrun.com/api/v1/games?name=${encodeURIComponent(gameName)}`);
+    const gameData = await gameRes.json();
+    
+    if (!gameData.data || gameData.data.length === 0) return [];
+    const gameId = gameData.data[0].id;
+
+    // 2. Récupérer les catégories et les leaderboards (top 1)
+    const categoryRes = await fetch(`https://www.speedrun.com/api/v1/games/${gameId}/categories`);
+    const categoryData = await categoryRes.json();
+    
+    const topRuns = await Promise.all(
+      categoryData.data.slice(0, 3).map(async (cat: any) => {
+        const lbRes = await fetch(`https://www.speedrun.com/api/v1/leaderboards/${gameId}/category/${cat.id}?top=1&embed=players`);
+        const lbData = await lbRes.json();
+        
+        const run = lbData.data.runs[0];
+        if (!run) return null;
+
+        const timeInSeconds = run.run.times.primary_t;
+        const hours = Math.floor(timeInSeconds / 3600);
+        const minutes = Math.floor((timeInSeconds % 3600) / 60);
+        const seconds = Math.floor(timeInSeconds % 60);
+        
+        const formattedTime = [
+          hours > 0 ? hours.toString().padStart(2, '0') : null,
+          minutes.toString().padStart(2, '0'),
+          seconds.toString().padStart(2, '0')
+        ].filter(Boolean).join(':');
+
+        return {
+          category: cat.name,
+          player: lbData.data.players.data[0]?.names?.international || "Unknown",
+          time: formattedTime,
+          date: new Date(run.run.date).toLocaleDateString('fr-FR'),
+          url: run.run.weblink
+        };
+      })
+    );
+
+    return topRuns.filter(Boolean);
+  } catch (e) {
+    console.error("Speedrun API Error:", e);
+    return [];
+  }
+}
+
 export async function searchSteamGames(query: string) {
   if (!query || query.length < 2) return [];
   

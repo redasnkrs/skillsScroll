@@ -4,32 +4,20 @@ import { useState } from "react";
 
 const tabs = ["News", "Speedrun", "Tips"];
 
-export default function ContentTabs({ steamNews }: { steamNews: any[] }) {
+export default function ContentTabs({ steamNews, speedruns }: { steamNews: any[], speedruns: any[] }) {
   const [activeTab, setActiveTab] = useState("News");
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
   const staticContent: Record<string, any[]> = {
-    Speedrun: [
-      { date: "02.03.2026", title: "Any% Unrestricted: 12:45", desc: "New world record using the recently discovered Limgrave skip." },
-      { date: "25.02.2026", title: "Glitchless Route Optimization", desc: "Saving 15 seconds in the mid-game through better stamina management." }
-    ],
     Tips: [
       { date: "01.03.2026", title: "Boss Strategy: Malenia", desc: "Detailed breakdown of the Waterfowl Dance evasion timing." },
       { date: "24.02.2026", title: "Hidden Mechanics Explained", desc: "How poise works under the hood and how to exploit it." }
     ]
   };
 
-  const getActiveItems = () => {
-    if (activeTab === "News") return steamNews;
-    return staticContent[activeTab] || [];
-  };
-
-  const items = getActiveItems();
-
-  // Fonction pour "nettoyer" grossièrement le BBCode/HTML de Steam pour l'affichage
   const formatSteamContent = (html: string) => {
     return html
-      .replace(/\[img\](.*?)\[\/img\]/g, '') // Enlever les images BBCode pour la sobriété
+      .replace(/\[img\](.*?)\[\/img\]/g, '')
       .replace(/\[b\]/g, '<strong>').replace(/\[\/b\]/g, '</strong>')
       .replace(/\[i\]/g, '<em>').replace(/\[\/i\]/g, '</em>')
       .replace(/\[url=(.*?)\](.*?)\[\/url\]/g, '<a href="$1" target="_blank" class="text-white underline">$2</a>')
@@ -59,66 +47,80 @@ export default function ContentTabs({ steamNews }: { steamNews: any[] }) {
       </div>
 
       <div className="space-y-6">
-        {items.length > 0 ? (
-          items.map((item, idx) => {
-            const isExpanded = expandedIndex === idx && activeTab === "News";
-            
-            return (
-              <article 
-                key={idx} 
-                className={`group p-8 border border-zinc-900 rounded-lg transition-all ${
-                  isExpanded ? "bg-zinc-900/40 border-zinc-700" : "bg-zinc-950/20 hover:bg-zinc-900/40"
-                }`}
-              >
-                <div className="flex justify-between items-start mb-4">
-                  <h3 className="text-lg font-bold text-zinc-200 group-hover:text-white transition-colors max-w-xl">
-                    {item.title}
-                  </h3>
-                  <span className="text-[10px] font-mono text-zinc-800 group-hover:text-zinc-600 transition-colors shrink-0">
-                    {item.date}
-                  </span>
-                </div>
-
-                {isExpanded ? (
-                  <div 
-                    className="text-sm text-zinc-400 leading-relaxed font-light animate-in fade-in slide-in-from-top-2 duration-500"
-                    dangerouslySetInnerHTML={{ __html: formatSteamContent(item.fullContent) }}
-                  />
+        {/* Affichage des Speedruns */}
+        {activeTab === "Speedrun" && (
+          <div className="overflow-hidden border border-zinc-900 rounded-lg bg-zinc-950/20 animate-in fade-in duration-500">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-zinc-900/50 border-b border-zinc-900">
+                  <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Category</th>
+                  <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Player</th>
+                  <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Time</th>
+                  <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Date</th>
+                  <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500 text-right">Link</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-900">
+                {speedruns.length > 0 ? (
+                  speedruns.map((run, idx) => (
+                    <tr key={idx} className="hover:bg-zinc-900/30 transition-colors">
+                      <td className="p-4 text-xs font-bold text-zinc-200">{run.category}</td>
+                      <td className="p-4 text-xs text-zinc-400">{run.player}</td>
+                      <td className="p-4 text-xs font-mono text-white">{run.time}</td>
+                      <td className="p-4 text-[10px] font-mono text-zinc-600 uppercase">{run.date}</td>
+                      <td className="p-4 text-right">
+                        <a href={run.url} target="_blank" rel="noopener noreferrer" className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">
+                          RECORD &rarr;
+                        </a>
+                      </td>
+                    </tr>
+                  ))
                 ) : (
-                  <p className="text-sm text-zinc-500 leading-relaxed line-clamp-3 italic">
-                    {item.desc}
-                  </p>
+                  <tr>
+                    <td colSpan={5} className="p-12 text-center text-[10px] font-mono text-zinc-700 uppercase tracking-widest">
+                      No speedrun data found in the global archives
+                    </td>
+                  </tr>
                 )}
-
-                <div className="mt-8 flex items-center gap-6">
-                  {activeTab === "News" && (
-                    <button 
-                      onClick={() => setExpandedIndex(isExpanded ? null : idx)}
-                      className="text-[10px] font-bold uppercase tracking-widest text-white border-b border-zinc-700 hover:border-white transition-all pb-1"
-                    >
-                      {isExpanded ? "Close Reader" : "Read Full Entry"}
-                    </button>
-                  )}
-                  
-                  {item.url && (
-                    <a 
-                      href={item.url} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 hover:text-zinc-400 transition-colors"
-                    >
-                      Steam Link &rarr;
-                    </a>
-                  )}
-                </div>
-              </article>
-            );
-          })
-        ) : (
-          <div className="py-20 text-center border border-dashed border-zinc-900 rounded-lg text-zinc-700 text-xs font-mono uppercase tracking-widest">
-            No entries found in this archive node
+              </tbody>
+            </table>
           </div>
         )}
+
+        {/* Affichage des News */}
+        {activeTab === "News" && steamNews.map((item, idx) => {
+          const isExpanded = expandedIndex === idx;
+          return (
+            <article key={idx} className={`group p-8 border border-zinc-900 rounded-lg transition-all ${isExpanded ? "bg-zinc-900/40 border-zinc-700" : "bg-zinc-950/20 hover:bg-zinc-900/40"}`}>
+              <div className="flex justify-between items-start mb-4">
+                <h3 className="text-lg font-bold text-zinc-200 group-hover:text-white transition-colors max-w-xl">{item.title}</h3>
+                <span className="text-[10px] font-mono text-zinc-800 group-hover:text-zinc-600 transition-colors shrink-0">{item.date}</span>
+              </div>
+              {isExpanded ? (
+                <div className="text-sm text-zinc-400 leading-relaxed font-light animate-in fade-in slide-in-from-top-2 duration-500" dangerouslySetInnerHTML={{ __html: formatSteamContent(item.fullContent) }} />
+              ) : (
+                <p className="text-sm text-zinc-500 leading-relaxed line-clamp-3 italic">"{item.desc}"</p>
+              )}
+              <div className="mt-8 flex items-center gap-6">
+                <button onClick={() => setExpandedIndex(isExpanded ? null : idx)} className="text-[10px] font-bold uppercase tracking-widest text-white border-b border-zinc-700 hover:border-white transition-all pb-1">
+                  {isExpanded ? "Close Reader" : "Read Full Entry"}
+                </button>
+                {item.url && <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 hover:text-zinc-400 transition-colors">Steam Link &rarr;</a>}
+              </div>
+            </article>
+          );
+        })}
+
+        {/* Affichage des Tips */}
+        {activeTab === "Tips" && staticContent.Tips.map((item, idx) => (
+          <article key={idx} className="group p-8 border border-zinc-900 rounded-lg bg-zinc-950/20 hover:bg-zinc-900/40 transition-all">
+            <div className="flex justify-between items-baseline mb-4">
+              <h3 className="text-lg font-bold text-zinc-200 group-hover:text-white transition-colors">{item.title}</h3>
+              <span className="text-[10px] font-mono text-zinc-800 group-hover:text-zinc-600 transition-colors">{item.date}</span>
+            </div>
+            <p className="text-sm text-zinc-500 leading-relaxed italic">"{item.desc}"</p>
+          </article>
+        ))}
       </div>
     </div>
   );
