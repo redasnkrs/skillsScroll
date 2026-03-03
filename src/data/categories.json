@@ -23,5 +23,10 @@
     "id": "massively-multiplayer",
     "name": "Massively Multiplayer",
     "icon": "📁"
+  },
+  {
+    "id": "adventure",
+    "name": "Adventure",
+    "icon": "🗺️"
   }
 ]

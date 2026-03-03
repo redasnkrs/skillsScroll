@@ -15,6 +15,7 @@ async function getSteamNews(steamId: number | null) {
     return data.appnews.newsitems.map((item: any) => ({
       title: item.title,
       desc: item.contents.replace(/<[^>]*>/g, '').substring(0, 200) + "...",
+      fullContent: item.contents,
       date: new Date(item.date * 1000).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' }),
       url: item.url
     }));

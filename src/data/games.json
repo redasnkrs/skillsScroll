@@ -46,5 +46,13 @@
     "category": "Action",
     "icon": "⚔️",
     "imageUrl": "https://cdn.akamai.steamstatic.com/steam/apps/3764200/header.jpg"
+  },
+  {
+    "id": "baldur's-gate-3",
+    "steamId": 1086940,
+    "name": "Baldur's Gate 3",
+    "category": "Adventure",
+    "icon": "🗺️",
+    "imageUrl": "https://cdn.akamai.steamstatic.com/steam/apps/1086940/header.jpg"
   }
 ]
