@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import ContentTabs from "@/components/ContentTabs";
 import { notFound } from "next/navigation";
-import { getSpeedrunData, getRedditTips } from "@/app/actions";
+import { getSpeedrunData, getRedditTips, getBuildsForGame } from "@/app/actions";
 
 async function getSteamNews(steamId: number | null) {
   if (!steamId) return [];
@@ -39,11 +39,12 @@ export default async function GamePage({ params }: { params: { id: string } }) {
     notFound();
   }
 
-  // Triple fetch simultané (News, Speedrun, Reddit Tips)
-  const [steamNews, speedruns, redditTips] = await Promise.all([
+  // Quadruple fetch simultané (News, Speedrun, Reddit Tips, Local Builds)
+  const [steamNews, speedruns, redditTips, builds] = await Promise.all([
     getSteamNews(game.steamId),
     getSpeedrunData(game.name),
-    getRedditTips(game.name)
+    getRedditTips(game.name),
+    getBuildsForGame(id)
   ]);
 
   return (
@@ -55,7 +56,7 @@ export default async function GamePage({ params }: { params: { id: string } }) {
         <span className="text-zinc-800">VAULT NODE / {game.id}</span>
       </nav>
 
-      <header className="relative h-[400px] rounded-2xl overflow-hidden border border-zinc-900 group">
+      <header className="relative h-[400px] rounded-2xl overflow-hidden border border-zinc-900 group shadow-2xl">
         {game.imageUrl && (
           <Image
             src={game.imageUrl}
@@ -75,11 +76,16 @@ export default async function GamePage({ params }: { params: { id: string } }) {
         </div>
       </header>
 
-      <ContentTabs steamNews={steamNews} speedruns={speedruns} redditTips={redditTips} />
+      <ContentTabs 
+        steamNews={steamNews} 
+        speedruns={speedruns} 
+        redditTips={redditTips} 
+        builds={builds} 
+      />
 
       <footer className="mt-40 pt-12 border-t border-zinc-950 flex justify-between items-center text-[10px] font-mono text-zinc-800 uppercase tracking-[0.4em]">
         <span>Automated Data Node</span>
-        <span>Revision: 3.1.2</span>
+        <span>Secure Local Storage</span>
       </footer>
     </div>
   );

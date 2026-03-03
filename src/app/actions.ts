@@ -166,6 +166,33 @@ export async function getRedditTips(gameName: string) {
   }
 }
 
+export async function getBuildsForGame(gameId: string) {
+  try {
+    const buildsDir = path.join(process.cwd(), "src/data/builds", gameId);
+    try {
+      const files = await fs.readdir(buildsDir);
+      const builds = await Promise.all(
+        files.map(async (file) => {
+          if (!file.endsWith(".md")) return null;
+          const content = await fs.readFile(path.join(buildsDir, file), "utf8");
+          const title = content.split('\n')[0].replace('# ', '');
+          return {
+            id: file.replace('.md', ''),
+            title,
+            content
+          };
+        })
+      );
+      return builds.filter(Boolean);
+    } catch {
+      return []; // Dossier inexistant = aucun build
+    }
+  } catch (e) {
+    console.error("Builds read error:", e);
+    return [];
+  }
+}
+
 export async function searchSteamGames(query: string) {
   if (!query || query.length < 2) return [];
   
