@@ -4,6 +4,8 @@ import Link from "next/link";
 import fs from "fs/promises";
 import path from "path";
 import "./globals.css";
+import MaintenanceToggle from "@/components/MaintenanceToggle";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -62,6 +64,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               </ul>
             </div>
           </nav>
+          <div className="p-8 border-t border-zinc-900 mt-auto">
+            <MaintenanceToggle />
+          </div>
         </aside>
 
         {/* Main Content */}
@@ -70,6 +75,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             {children}
           </div>
         </main>
+        <Toaster theme="dark" position="bottom-right" richColors toastOptions={{
+          style: { background: '#090a0c', border: '1px solid #18181b', color: '#d4d4d8' }
+        }} />
       </body>
     </html>
   );

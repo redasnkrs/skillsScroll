@@ -8,22 +8,6 @@
     "imageUrl": "https://cdn.akamai.steamstatic.com/steam/apps/1245620/header.jpg"
   },
   {
-    "id": "tarkov",
-    "steamId": null,
-    "name": "Tarkov",
-    "category": "Tactical FPS",
-    "icon": "🔫",
-    "imageUrl": "https://media.rawg.io/media/games/698/698a9792040b2a75936e7a5616335359.jpg"
-  },
-  {
-    "id": "sekiro",
-    "steamId": 814380,
-    "name": "Sekiro",
-    "category": "Action",
-    "icon": "🗡️",
-    "imageUrl": "https://media.rawg.io/media/games/20a/20a43c7da197c76ba859666ee5d69116.jpg"
-  },
-  {
     "id": "resident-evil-4",
     "steamId": 2050650,
     "name": "Resident Evil 4",

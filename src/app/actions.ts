@@ -185,11 +185,62 @@ export async function getBuildsForGame(gameId: string) {
       );
       return builds.filter(Boolean);
     } catch {
-      return []; // Dossier inexistant = aucun build
+      return [];
     }
   } catch (e) {
     console.error("Builds read error:", e);
     return [];
+  }
+}
+
+export async function saveBuild(gameId: string, title: string, content: string) {
+  try {
+    const buildsDir = path.join(process.cwd(), "src/data/builds", gameId);
+    await fs.mkdir(buildsDir, { recursive: true });
+    
+    const fileName = title.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") + ".md";
+    const filePath = path.join(buildsDir, fileName);
+    
+    // On s'assure que le titre est bien en H1 au début du fichier
+    const finalContent = content.startsWith("# ") ? content : `# ${title}\n\n${content}`;
+    
+    await fs.writeFile(filePath, finalContent);
+    revalidatePath(`/game/${gameId}`);
+    return { success: true };
+  } catch (e) {
+    console.error("Save build error:", e);
+    return { error: "Failed to save build" };
+  }
+}
+
+export async function deleteGame(gameId: string) {
+  try {
+    const file = await fs.readFile(GAMES_PATH, "utf8");
+    const games = JSON.parse(file);
+    const updatedGames = games.filter((g: any) => g.id !== gameId);
+    await fs.writeFile(GAMES_PATH, JSON.stringify(updatedGames, null, 2));
+    
+    // Supprimer aussi le dossier de builds associé
+    const buildsDir = path.join(process.cwd(), "src/data/builds", gameId);
+    await fs.rm(buildsDir, { recursive: true, force: true });
+    
+    revalidatePath("/");
+    return { success: true };
+  } catch (e) {
+    console.error("Delete game error:", e);
+    return { error: "Failed to delete game" };
+  }
+}
+
+export async function deleteBuild(gameId: string, buildId: string) {
+  try {
+    const filePath = path.join(process.cwd(), "src/data/builds", gameId, `${buildId}.md`);
+    await fs.unlink(filePath);
+    revalidatePath(`/game/${gameId}`);
+    return { success: true };
+  } catch (e) {
+    console.error("Delete build error:", e);
+    return { error: "Failed to delete build" };
   }
 }
 
