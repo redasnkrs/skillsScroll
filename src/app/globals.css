@@ -1,45 +1,45 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --border: #e5e7eb;
+  --background: #000000;
+  --foreground: #d4d4d8; /* zinc-300 */
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-border: var(--border);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    --border: #262626;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), sans-serif;
+  font-family: var(--font-geist-sans), sans-serif;
+  overflow-x: hidden;
+}
+
+/* Optimisations de rendu */
+* {
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
 }
 
-.subtle-card {
-  border: 1px solid var(--border);
-  transition: background 0.2s ease;
+/* Animations de transition fluides */
+.animate-in {
+  animation-duration: 500ms;
+  animation-fill-mode: both;
 }
 
-.subtle-card:hover {
-  background: rgba(0, 0, 0, 0.02);
+.fade-in {
+  animation-name: fadeIn;
 }
 
-@media (prefers-color-scheme: dark) {
-  .subtle-card:hover {
-    background: rgba(255, 255, 255, 0.02);
-  }
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Optimisation GPU pour les zooms */
+.group:hover .object-cover {
+  will-change: transform;
 }

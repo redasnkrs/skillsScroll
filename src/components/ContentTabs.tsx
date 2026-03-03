@@ -4,16 +4,9 @@ import { useState } from "react";
 
 const tabs = ["News", "Speedrun", "Tips"];
 
-export default function ContentTabs({ steamNews, speedruns }: { steamNews: any[], speedruns: any[] }) {
+export default function ContentTabs({ steamNews, speedruns, redditTips }: { steamNews: any[], speedruns: any[], redditTips: any[] }) {
   const [activeTab, setActiveTab] = useState("News");
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
-
-  const staticContent: Record<string, any[]> = {
-    Tips: [
-      { date: "01.03.2026", title: "Boss Strategy: Malenia", desc: "Detailed breakdown of the Waterfowl Dance evasion timing." },
-      { date: "24.02.2026", title: "Hidden Mechanics Explained", desc: "How poise works under the hood and how to exploit it." }
-    ]
-  };
 
   const formatSteamContent = (html: string) => {
     return html
@@ -47,7 +40,7 @@ export default function ContentTabs({ steamNews, speedruns }: { steamNews: any[]
       </div>
 
       <div className="space-y-6">
-        {/* Affichage des Speedruns */}
+        {/* Speedrun Tab */}
         {activeTab === "Speedrun" && (
           <div className="overflow-hidden border border-zinc-900 rounded-lg bg-zinc-950/20 animate-in fade-in duration-500">
             <table className="w-full text-left border-collapse">
@@ -56,8 +49,7 @@ export default function ContentTabs({ steamNews, speedruns }: { steamNews: any[]
                   <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Category</th>
                   <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Player</th>
                   <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Time</th>
-                  <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Date</th>
-                  <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500 text-right">Link</th>
+                  <th className="p-4 text-right pr-8 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Link</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-900">
@@ -67,8 +59,7 @@ export default function ContentTabs({ steamNews, speedruns }: { steamNews: any[]
                       <td className="p-4 text-xs font-bold text-zinc-200">{run.category}</td>
                       <td className="p-4 text-xs text-zinc-400">{run.player}</td>
                       <td className="p-4 text-xs font-mono text-white">{run.time}</td>
-                      <td className="p-4 text-[10px] font-mono text-zinc-600 uppercase">{run.date}</td>
-                      <td className="p-4 text-right">
+                      <td className="p-4 text-right pr-8">
                         <a href={run.url} target="_blank" rel="noopener noreferrer" className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">
                           RECORD &rarr;
                         </a>
@@ -77,8 +68,8 @@ export default function ContentTabs({ steamNews, speedruns }: { steamNews: any[]
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={5} className="p-12 text-center text-[10px] font-mono text-zinc-700 uppercase tracking-widest">
-                      No speedrun data found in the global archives
+                    <td colSpan={4} className="p-12 text-center text-[10px] font-mono text-zinc-700 uppercase tracking-widest">
+                      No speedrun data indexed
                     </td>
                   </tr>
                 )}
@@ -87,7 +78,7 @@ export default function ContentTabs({ steamNews, speedruns }: { steamNews: any[]
           </div>
         )}
 
-        {/* Affichage des News */}
+        {/* News Tab */}
         {activeTab === "News" && steamNews.map((item, idx) => {
           const isExpanded = expandedIndex === idx;
           return (
@@ -105,20 +96,25 @@ export default function ContentTabs({ steamNews, speedruns }: { steamNews: any[]
                 <button onClick={() => setExpandedIndex(isExpanded ? null : idx)} className="text-[10px] font-bold uppercase tracking-widest text-white border-b border-zinc-700 hover:border-white transition-all pb-1">
                   {isExpanded ? "Close Reader" : "Read Full Entry"}
                 </button>
-                {item.url && <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 hover:text-zinc-400 transition-colors">Steam Link &rarr;</a>}
               </div>
             </article>
           );
         })}
 
-        {/* Affichage des Tips */}
-        {activeTab === "Tips" && staticContent.Tips.map((item, idx) => (
+        {/* Tips Tab (Reddit) */}
+        {activeTab === "Tips" && redditTips.map((tip, idx) => (
           <article key={idx} className="group p-8 border border-zinc-900 rounded-lg bg-zinc-950/20 hover:bg-zinc-900/40 transition-all">
-            <div className="flex justify-between items-baseline mb-4">
-              <h3 className="text-lg font-bold text-zinc-200 group-hover:text-white transition-colors">{item.title}</h3>
-              <span className="text-[10px] font-mono text-zinc-800 group-hover:text-zinc-600 transition-colors">{item.date}</span>
+            <div className="flex justify-between items-start mb-4">
+              <h3 className="text-lg font-bold text-zinc-200 group-hover:text-white transition-colors max-w-xl">{tip.title}</h3>
+              <div className="flex flex-col items-end">
+                <span className="text-[10px] font-mono text-zinc-800 uppercase">u/{tip.author}</span>
+                <span className="text-[10px] font-mono text-emerald-900 font-bold">+{tip.score} UPVOTES</span>
+              </div>
             </div>
-            <p className="text-sm text-zinc-500 leading-relaxed italic">"{item.desc}"</p>
+            <p className="text-sm text-zinc-500 leading-relaxed line-clamp-4 italic mb-6">"{tip.desc}"</p>
+            <a href={tip.url} target="_blank" rel="noopener noreferrer" className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 hover:text-white transition-colors border-b border-zinc-900 hover:border-white pb-1">
+              Read Community Discussion &rarr;
+            </a>
           </article>
         ))}
       </div>

@@ -1,9 +1,10 @@
 import fs from "fs/promises";
 import path from "path";
 import Link from "next/link";
+import Image from "next/image";
 import ContentTabs from "@/components/ContentTabs";
 import { notFound } from "next/navigation";
-import { getSpeedrunData } from "@/app/actions";
+import { getSpeedrunData, getRedditTips } from "@/app/actions";
 
 async function getSteamNews(steamId: number | null) {
   if (!steamId) return [];
@@ -38,26 +39,30 @@ export default async function GamePage({ params }: { params: { id: string } }) {
     notFound();
   }
 
-  // Récupération simultanée des news et des speedruns
-  const [steamNews, speedruns] = await Promise.all([
+  // Triple fetch simultané (News, Speedrun, Reddit Tips)
+  const [steamNews, speedruns, redditTips] = await Promise.all([
     getSteamNews(game.steamId),
-    getSpeedrunData(game.name)
+    getSpeedrunData(game.name),
+    getRedditTips(game.name)
   ]);
 
   return (
     <div className="max-w-5xl animate-in fade-in duration-700">
-      <nav className="mb-12 flex justify-between items-center">
-        <Link href="/" className="text-[10px] font-bold text-zinc-600 hover:text-white transition-colors tracking-[0.4em] uppercase">
-          &larr; Return to Library
+      <nav className="mb-12 flex justify-between items-center text-[10px] font-mono uppercase tracking-[0.4em]">
+        <Link href="/" className="text-zinc-600 hover:text-white transition-colors">
+          &larr; INDEX
         </Link>
-        <span className="text-[10px] font-mono text-zinc-800 uppercase">Archive Node: {game.id}</span>
+        <span className="text-zinc-800">VAULT NODE / {game.id}</span>
       </nav>
 
       <header className="relative h-[400px] rounded-2xl overflow-hidden border border-zinc-900 group">
         {game.imageUrl && (
-          <div 
-            className="absolute inset-0 z-0 scale-105 group-hover:scale-110 transition-transform duration-[2s] opacity-40 blur-[2px]"
-            style={{ backgroundImage: `url(${game.imageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+          <Image
+            src={game.imageUrl}
+            alt={game.name}
+            fill
+            priority
+            className="object-cover opacity-40 blur-[1px] scale-105 group-hover:scale-110 transition-transform duration-[2s]"
           />
         )}
         <div className="relative z-10 h-full p-12 flex flex-col justify-end bg-gradient-to-t from-black via-black/40 to-transparent">
@@ -70,11 +75,11 @@ export default async function GamePage({ params }: { params: { id: string } }) {
         </div>
       </header>
 
-      <ContentTabs steamNews={steamNews} speedruns={speedruns} />
+      <ContentTabs steamNews={steamNews} speedruns={speedruns} redditTips={redditTips} />
 
       <footer className="mt-40 pt-12 border-t border-zinc-950 flex justify-between items-center text-[10px] font-mono text-zinc-800 uppercase tracking-[0.4em]">
-        <span>Vault Access: Authorized</span>
-        <span>Revision: 2.1.0</span>
+        <span>Automated Data Node</span>
+        <span>Revision: 3.1.2</span>
       </footer>
     </div>
   );

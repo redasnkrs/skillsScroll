@@ -144,6 +144,28 @@ export async function getSpeedrunData(gameName: string) {
   }
 }
 
+export async function getRedditTips(gameName: string) {
+  try {
+    const res = await fetch(
+      `https://www.reddit.com/search.json?q=${encodeURIComponent(gameName)}+tips+guide&sort=relevance&t=all&limit=5`,
+      { next: { revalidate: 3600 } }
+    );
+    const data = await res.json();
+    
+    return data.data.children.map((child: any) => ({
+      title: child.data.title,
+      desc: child.data.selftext.substring(0, 250) + "...",
+      author: child.data.author,
+      score: child.data.score,
+      date: new Date(child.data.created_utc * 1000).toLocaleDateString('fr-FR'),
+      url: `https://www.reddit.com${child.data.permalink}`
+    }));
+  } catch (e) {
+    console.error("Reddit API Error:", e);
+    return [];
+  }
+}
+
 export async function searchSteamGames(query: string) {
   if (!query || query.length < 2) return [];
   
