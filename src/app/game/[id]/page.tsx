@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import ContentTabs from "@/components/ContentTabs";
 import { notFound } from "next/navigation";
-import { getSpeedrunData, getRedditTips, getBuildsForGame } from "@/app/actions";
+import { getSpeedrunData, getRedditTips, getBuildsForGame, getSteamAchievements } from "@/app/actions";
 
 async function getSteamNews(steamId: number | null) {
   if (!steamId) return [];
@@ -39,12 +39,13 @@ export default async function GamePage({ params }: { params: { id: string } }) {
     notFound();
   }
 
-  // Quadruple fetch simultané (News, Speedrun, Reddit Tips, Local Builds)
-  const [steamNews, speedruns, redditTips, builds] = await Promise.all([
+  // Quintuple fetch simultané (News, Speedrun, Reddit Tips, Local Builds, Achievements)
+  const [steamNews, speedruns, redditTips, builds, achievements] = await Promise.all([
     getSteamNews(game.steamId),
     getSpeedrunData(game.name),
     getRedditTips(game.name),
-    getBuildsForGame(id)
+    getBuildsForGame(id),
+    getSteamAchievements(game.steamId)
   ]);
 
   return (
@@ -81,6 +82,7 @@ export default async function GamePage({ params }: { params: { id: string } }) {
         speedruns={speedruns} 
         redditTips={redditTips} 
         builds={builds} 
+        achievements={achievements}
       />
 
       <footer className="mt-40 pt-12 border-t border-zinc-950 flex justify-between items-center text-[10px] font-mono text-zinc-800 uppercase tracking-[0.4em]">

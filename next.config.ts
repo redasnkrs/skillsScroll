@@ -9,6 +9,14 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'community.akamai.steamstatic.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn.fastly.steamstatic.com',
+      },
+      {
+        protocol: 'https',
         hostname: 'media.rawg.io',
       },
     ],

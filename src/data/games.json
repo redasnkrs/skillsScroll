@@ -24,19 +24,35 @@
     "imageUrl": "https://cdn.akamai.steamstatic.com/steam/apps/952060/header.jpg"
   },
   {
-    "id": "resident-evil-requiem",
-    "steamId": 3764200,
-    "name": "Resident Evil Requiem",
-    "category": "Action",
-    "icon": "⚔️",
-    "imageUrl": "https://cdn.akamai.steamstatic.com/steam/apps/3764200/header.jpg"
-  },
-  {
     "id": "baldur's-gate-3",
     "steamId": 1086940,
     "name": "Baldur's Gate 3",
     "category": "Adventure",
     "icon": "🗺️",
     "imageUrl": "https://cdn.akamai.steamstatic.com/steam/apps/1086940/header.jpg"
+  },
+  {
+    "id": "resident-evil-2",
+    "steamId": 883710,
+    "name": "Resident Evil 2",
+    "category": "Action",
+    "icon": "⚔️",
+    "imageUrl": "https://cdn.akamai.steamstatic.com/steam/apps/883710/header.jpg"
+  },
+  {
+    "id": "no-rest-for-the-wicked",
+    "steamId": 1371980,
+    "name": "No Rest for the Wicked",
+    "category": "Action",
+    "icon": "⚔️",
+    "imageUrl": "https://cdn.akamai.steamstatic.com/steam/apps/1371980/header.jpg"
+  },
+  {
+    "id": "resident-evil-requiem",
+    "steamId": 3764200,
+    "name": "Resident Evil Requiem",
+    "category": "Action",
+    "icon": "⚔️",
+    "imageUrl": "https://cdn.akamai.steamstatic.com/steam/apps/3764200/header.jpg"
   }
 ]

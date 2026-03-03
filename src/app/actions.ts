@@ -113,8 +113,9 @@ export async function getSpeedrunData(gameName: string) {
         const lbRes = await fetch(`https://www.speedrun.com/api/v1/leaderboards/${gameId}/category/${cat.id}?top=1&embed=players`);
         const lbData = await lbRes.json();
         
+        if (!lbData.data || !lbData.data.runs || lbData.data.runs.length === 0) return null;
+        
         const run = lbData.data.runs[0];
-        if (!run) return null;
 
         const timeInSeconds = run.run.times.primary_t;
         const hours = Math.floor(timeInSeconds / 3600);
@@ -162,6 +163,46 @@ export async function getRedditTips(gameName: string) {
     }));
   } catch (e) {
     console.error("Reddit API Error:", e);
+    return [];
+  }
+}
+
+export async function getSteamAchievements(steamId: number | null) {
+  if (!steamId) return [];
+  try {
+    const url = `https://steamcommunity.com/stats/${steamId}/achievements/`;
+    const res = await fetch(url, { 
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36' },
+      next: { revalidate: 86400 } 
+    });
+    const html = await res.text();
+
+    const achievements: any[] = [];
+    
+    // Découpage par bloc de ligne de trophée (plus robuste)
+    const blocks = html.split('<div class="achieveRow');
+    blocks.shift(); // On enlève le premier morceau qui précède le premier trophée
+
+    blocks.forEach(block => {
+      const name = block.match(/<h3>(.*?)<\/h3>/)?.[1];
+      const desc = block.match(/<h5>(.*?)<\/h5>/)?.[1];
+      const icon = block.match(/<img src="(.*?)"/)?.[1];
+      const percentMatch = block.match(/<div class="achievePercent">(.*?)%<\/div>/);
+      const rarity = percentMatch ? parseFloat(percentMatch[1]) : null;
+
+      if (name && icon) {
+        achievements.push({
+          name: name.trim(),
+          desc: desc ? desc.trim() : "Secret achievement",
+          icon: icon,
+          rarity: rarity
+        });
+      }
+    });
+
+    return achievements;
+  } catch (e) {
+    console.error("Steam Achievements Scraping Error:", e);
     return [];
   }
 }

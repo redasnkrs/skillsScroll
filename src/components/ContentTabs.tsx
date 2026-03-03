@@ -5,19 +5,22 @@ import { saveBuild, deleteBuild } from "@/app/actions";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
 import ConfirmModal from "./ConfirmModal";
+import Image from "next/image";
 
-const tabs = ["News", "Speedrun", "Tips", "Builds"];
+const tabs = ["News", "Speedrun", "Tips", "Builds", "Achievements"];
 
 export default function ContentTabs({ 
   steamNews, 
   speedruns, 
   redditTips, 
-  builds 
+  builds,
+  achievements
 }: { 
   steamNews: any[], 
   speedruns: any[], 
   redditTips: any[],
-  builds: any[]
+  builds: any[],
+  achievements: any[]
 }) {
   const params = useParams();
   const gameId = params.id as string;
@@ -114,6 +117,31 @@ export default function ContentTabs({
       </div>
 
       <div className="space-y-6">
+        {/* Achievements Tab */}
+        {activeTab === "Achievements" && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in duration-500">
+            {achievements.length > 0 ? achievements.map((ach, idx) => (
+              <div key={idx} className="flex gap-6 p-6 border border-zinc-900 rounded-xl bg-zinc-950/20 group hover:bg-zinc-900/40 transition-all">
+                <div className="relative w-16 h-16 shrink-0 rounded-lg overflow-hidden border border-zinc-800 grayscale group-hover:grayscale-0 transition-all duration-500">
+                  <Image src={ach.icon} alt={ach.name} fill className="object-cover" />
+                </div>
+                <div className="flex flex-col justify-center flex-grow">
+                  <div className="flex justify-between items-start">
+                    <h4 className="text-sm font-bold text-zinc-200 group-hover:text-white transition-colors uppercase tracking-tight">{ach.name}</h4>
+                    {ach.rarity !== null && (
+                      <span className="text-[10px] font-mono text-zinc-600 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">{ach.rarity}%</span>
+                    )}
+                  </div>
+                  <p className="text-xs text-zinc-500 mt-1 line-clamp-2 italic leading-relaxed">"{ach.desc}"</p>
+                </div>
+              </div>
+            )) : (
+              <div className="col-span-2 py-32 text-center border border-dashed border-zinc-900 rounded-xl text-zinc-800 text-[10px] font-mono uppercase tracking-[0.4em]">No synchronization with Steam Community Trophies</div>
+            )}
+          </div>
+        )}
+
+        {/* Builds Tab */}
         {activeTab === "Builds" && (
           <div className="animate-in fade-in duration-500">
             {!activeBuild && !isDrafting && (
@@ -165,7 +193,6 @@ export default function ContentTabs({
           </div>
         )}
 
-        {/* Modal De Suppression Unique pour le composant */}
         <ConfirmModal 
           isOpen={isDeleteModalOpen}
           title="Data Module Erasure"
@@ -174,7 +201,7 @@ export default function ContentTabs({
           onCancel={() => { setIsDeleteModalOpen(false); setBuildToDelete(null); }}
         />
 
-        {/* News, Speedrun, Tips remains unchanged but required for complete rewrite */}
+        {/* Speedrun, News, Tips unchanged */}
         {activeTab === "Speedrun" && (
           <div className="overflow-hidden border border-zinc-900 rounded-xl bg-zinc-950/20 animate-in fade-in duration-500">
             <table className="w-full text-left border-collapse">
