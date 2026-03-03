@@ -54,7 +54,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <ul className="space-y-1 italic">
                 {games.slice(0, 5).map((game: any) => (
                   <li key={game.id}>
-                    <Link href={`/?game=${game.id}`} className="flex items-center gap-3 px-3 py-2 rounded hover:bg-zinc-900 transition-colors text-xs text-zinc-600 hover:text-zinc-400">
+                    <Link href={`/game/${game.id}`} className="flex items-center gap-3 px-3 py-2 rounded hover:bg-zinc-900 transition-colors text-xs text-zinc-600 hover:text-zinc-400">
                       {game.name}
                     </Link>
                   </li>

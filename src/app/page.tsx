@@ -1,7 +1,7 @@
 import Link from "next/link";
 import fs from "fs/promises";
 import path from "path";
-import { addGameAuto } from "./actions";
+import SearchInput from "@/components/SearchInput";
 
 export default async function Home() {
   const GAMES_PATH = path.join(process.cwd(), "src/data/games.json");
@@ -20,26 +20,8 @@ export default async function Home() {
         <div className="h-1 w-12 bg-zinc-800"></div>
       </header>
 
-      {/* Ajout Auto - Champ unique */}
-      <section className="mb-24 bg-zinc-950 p-12 rounded-2xl border border-zinc-900 border-dashed">
-        <div className="max-w-md mx-auto text-center">
-          <p className="text-[10px] font-bold text-zinc-700 uppercase tracking-[0.4em] mb-8">One-Tap Archiving</p>
-          <form action={addGameAuto} className="flex flex-col gap-6">
-            <input 
-              name="name" 
-              placeholder="Search & Add Game..." 
-              className="bg-transparent border-b border-zinc-800 text-xl py-4 text-center focus:border-white outline-none text-white font-light tracking-tight transition-colors"
-              required
-            />
-            <button 
-              type="submit" 
-              className="text-[10px] font-bold uppercase tracking-[0.2em] px-8 py-4 border border-zinc-800 bg-zinc-900 hover:bg-white hover:text-black transition-all rounded-full self-center"
-            >
-              Add to Library +
-            </button>
-          </form>
-        </div>
-      </section>
+      {/* Ajout Auto - Champ unique réactif */}
+      <SearchInput />
 
       {/* Grid de Jeux */}
       <section className="mb-32">
@@ -47,7 +29,7 @@ export default async function Home() {
           {games.map((game: any) => (
             <Link 
               key={game.id} 
-              href={`/?game=${game.id}`}
+              href={`/game/${game.id}`}
               className="group relative h-64 rounded-lg border border-zinc-900 bg-zinc-950 overflow-hidden hover:border-zinc-500 transition-all duration-500"
             >
               {game.imageUrl && (

@@ -18,5 +18,10 @@
     "id": "action",
     "name": "Action",
     "icon": "⚔️"
+  },
+  {
+    "id": "massively-multiplayer",
+    "name": "Massively Multiplayer",
+    "icon": "📁"
   }
 ]

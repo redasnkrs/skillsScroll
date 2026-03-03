@@ -1,6 +1,7 @@
 [
   {
     "id": "elden-ring",
+    "steamId": 1245620,
     "name": "Elden Ring",
     "category": "Action RPG",
     "icon": "⚔️",
@@ -8,6 +9,7 @@
   },
   {
     "id": "tarkov",
+    "steamId": null,
     "name": "Tarkov",
     "category": "Tactical FPS",
     "icon": "🔫",
@@ -15,6 +17,7 @@
   },
   {
     "id": "sekiro",
+    "steamId": 814380,
     "name": "Sekiro",
     "category": "Action",
     "icon": "🗡️",
@@ -22,6 +25,7 @@
   },
   {
     "id": "resident-evil-4",
+    "steamId": 2050650,
     "name": "Resident Evil 4",
     "category": "Action",
     "icon": "⚔️",
@@ -29,6 +33,7 @@
   },
   {
     "id": "resident-evil-3",
+    "steamId": 952060,
     "name": "Resident Evil 3",
     "category": "Action",
     "icon": "⚔️",
@@ -36,6 +41,7 @@
   },
   {
     "id": "resident-evil-requiem",
+    "steamId": 3764200,
     "name": "Resident Evil Requiem",
     "category": "Action",
     "icon": "⚔️",

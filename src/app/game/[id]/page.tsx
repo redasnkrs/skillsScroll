@@ -1,0 +1,76 @@
+import fs from "fs/promises";
+import path from "path";
+import Link from "next/link";
+import ContentTabs from "@/components/ContentTabs";
+import { notFound } from "next/navigation";
+
+async function getSteamNews(steamId: number | null) {
+  if (!steamId) return [];
+  try {
+    const res = await fetch(
+      `https://api.steampowered.com/ISteamNews/GetNewsForApp/v0002/?appid=${steamId}&count=5&maxlength=300&format=json`,
+      { next: { revalidate: 3600 } } // Cache pour 1 heure
+    );
+    const data = await res.json();
+    return data.appnews.newsitems.map((item: any) => ({
+      title: item.title,
+      desc: item.contents.replace(/<[^>]*>/g, '').substring(0, 200) + "...",
+      date: new Date(item.date * 1000).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+      url: item.url
+    }));
+  } catch (e) {
+    console.error("Steam News Fetch Error:", e);
+    return [];
+  }
+}
+
+export default async function GamePage({ params }: { params: { id: string } }) {
+  const { id } = await params;
+  const DATA_PATH = path.join(process.cwd(), "src/data/games.json");
+  const file = await fs.readFile(DATA_PATH, "utf8");
+  const games = JSON.parse(file);
+  
+  const game = games.find((g: any) => g.id === id);
+
+  if (!game) {
+    notFound();
+  }
+
+  const steamNews = await getSteamNews(game.steamId);
+
+  return (
+    <div className="max-w-5xl animate-in fade-in duration-700">
+      <nav className="mb-12 flex justify-between items-center">
+        <Link href="/" className="text-[10px] font-bold text-zinc-600 hover:text-white transition-colors tracking-[0.4em] uppercase">
+          &larr; Return to Library
+        </Link>
+        <span className="text-[10px] font-mono text-zinc-800 uppercase">Archive Node: {game.id}</span>
+      </nav>
+
+      <header className="relative h-[400px] rounded-2xl overflow-hidden border border-zinc-900 group">
+        {game.imageUrl && (
+          <div 
+            className="absolute inset-0 z-0 scale-105 group-hover:scale-110 transition-transform duration-[2s] opacity-40 blur-[2px]"
+            style={{ backgroundImage: `url(${game.imageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+          />
+        )}
+        <div className="relative z-10 h-full p-12 flex flex-col justify-end bg-gradient-to-t from-black via-black/40 to-transparent">
+          <div className="flex items-center gap-4 mb-6">
+            <span className="text-4xl grayscale group-hover:grayscale-0 transition-all duration-500">{game.icon}</span>
+            <div className="h-[1px] w-12 bg-zinc-700"></div>
+          </div>
+          <h1 className="text-6xl font-black text-white tracking-tighter uppercase mb-4 leading-none">{game.name}</h1>
+          <p className="text-sm font-mono text-zinc-500 uppercase tracking-[0.4em]">{game.category} Archives</p>
+        </div>
+      </header>
+
+      {/* Dynamic Content Sections */}
+      <ContentTabs steamNews={steamNews} />
+
+      <footer className="mt-40 pt-12 border-t border-zinc-950 flex justify-between items-center text-[10px] font-mono text-zinc-800 uppercase tracking-[0.4em]">
+        <span>Vault Access: Authorized</span>
+        <span>Revision: 2.1.0</span>
+      </footer>
+    </div>
+  );
+}

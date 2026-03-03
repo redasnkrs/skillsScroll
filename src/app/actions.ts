@@ -43,6 +43,7 @@ async function getSteamData(gameName: string) {
         const mainGenre = data.genres?.[0]?.description || "Action";
         
         return {
+          id: appid,
           name: data.name,
           category: mainGenre,
           imageUrl: `https://cdn.akamai.steamstatic.com/steam/apps/${appid}/header.jpg`,
@@ -82,6 +83,7 @@ export async function addGameAuto(formData: FormData) {
 
   games.push({
     id: gameId,
+    steamId: steamData.id,
     name: steamData.name,
     category: steamData.category,
     icon: steamData.icon,
@@ -91,4 +93,24 @@ export async function addGameAuto(formData: FormData) {
   await fs.writeFile(GAMES_PATH, JSON.stringify(games, null, 2));
   revalidatePath("/");
   return { success: true };
+}
+
+export async function searchSteamGames(query: string) {
+  if (!query || query.length < 2) return [];
+  
+  try {
+    const res = await fetch(`https://store.steampowered.com/api/storesearch/?term=${encodeURIComponent(query)}&l=english&cc=US`);
+    const data = await res.json();
+
+    if (data.total > 0 && data.items) {
+      return data.items.slice(0, 5).map((item: any) => ({
+        id: item.id,
+        name: item.name,
+        imageUrl: `https://cdn.akamai.steamstatic.com/steam/apps/${item.id}/header.jpg`
+      }));
+    }
+  } catch (e) {
+    console.error("Steam Search Error:", e);
+  }
+  return [];
 }
